@@ -1,32 +1,26 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import { deleteContact } from "../store";
 
 export const ContactCard = ({ contact }) => {
     const navigate = useNavigate();
     const { dispatch } = useGlobalReducer();
 
     const handleDelete = async () => {
-        const confirmDelete = window.confirm("¿Estás seguro de eliminar este contacto?");
-        if (!confirmDelete) return;
+        if (!window.confirm("¿Estás seguro de eliminar este contacto?")) return;
 
         try {
-            const response = await fetch(`https://playground.4geeks.com/apis/fake/contact/${contact.id}`, {
-                method: "DELETE"
-            });
-
-            if (!response.ok) throw new Error("Error al eliminar contacto");
-
-            dispatch({ type: "refresh_needed" }); // Se dispara la recarga en useEffect
-        } catch (error) {
-            console.error("Error al eliminar contacto:", error);
+            await deleteContact(dispatch, contact.id);
+        } catch (err) {
+            console.error(err);
         }
     };
 
     return (
         <div className="card shadow-sm">
             <div className="card-body">
-                <h5 className="card-title">{contact.full_name}</h5>
+                <h5 className="card-title">{contact.name}</h5>
                 <p className="card-text">
                     📍 {contact.address}<br />
                     📞 {contact.phone}<br />
@@ -46,4 +40,5 @@ export const ContactCard = ({ contact }) => {
         </div>
     );
 };
+
 

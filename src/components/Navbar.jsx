@@ -1,19 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export const Navbar = () => {
+    const { pathname } = useLocation();
 
-	return (
-		<nav className="navbar navbar-light bg-light">
-			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
-				</Link>
-				<div className="ml-auto">
-					<Link to="/add-contact">
-						<button className="btn btn-primary">Agregar Contacto</button>
-					</Link>
-				</div>
-			</div>
-		</nav>
-	);
+    return (
+        <nav className="navbar navbar-light bg-light mb-3">
+            <div className="container">
+                <Link className="navbar-brand" to="/">Contact App</Link>
+
+                {pathname !== "/add-contact" && (
+                    <Link className="btn btn-success" to="/add-contact">
+                         Agregar contacto
+                    </Link>
+                )}
+            </div>
+        </nav>
+    );
 };

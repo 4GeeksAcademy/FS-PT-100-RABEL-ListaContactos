@@ -1,16 +1,34 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { useEffect } from "react";
+import { ContactCard } from "../components/ContactCard";
+import useGlobalReducer from "../hooks/useGlobalReducer";
+import { loadContacts } from "../store";
 
 export const Home = () => {
+    const { store, dispatch } = useGlobalReducer();
+    
+    useEffect(() => { loadContacts(dispatch); }, [dispatch]);
 
-  const {store, dispatch} =useGlobalReducer()
+    if (!Array.isArray(store.contacts)) {
+        return <p className="text-center mt-5">Cargando la agenda…</p>;
+    }
 
-	return (
-		<div className="text-center mt-5">
-			<h1>Hello Rigo!!</h1>
-			<p>
-				<img src={rigoImageUrl} />
-			</p>
-		</div>
-	);
-}; 
+    return (
+        <div className="container mt-4">
+            <h1 className="text-center mb-4">Lista de Contactos</h1>
+
+            <div className="row">
+                {store.contacts.length === 0 ? (
+                    <p className="text-center">No hay contactos</p>
+                ) : (
+                    store.contacts.map(c => (
+                        <div className="col-md-6 col-lg-4 mb-3" key={c.id}>
+                            <ContactCard contact={c} />
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+};
+
+

@@ -1,54 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import { addContact, updateContact } from "../store";
 
 export const AddContact = () => {
     const { store, dispatch } = useGlobalReducer();
-    const navigate = useNavigate();
-    const { id } = useParams();
+    const navigate  = useNavigate();
+    const { id }    = useParams();
 
     const [formData, setFormData] = useState({
-        full_name: "",
-        email: "noboarabel@gmail.com",
-        phone: "+34603650744",
-        address: "madrid",
-        agenda_slug: "rabel" 
+        name: "",
+        email: "",
+        phone: "",
+        address: ""
     });
 
     useEffect(() => {
         if (id) {
-            const contact = store.contacts.find(c => c.id === parseInt(id));
-            if (contact) {
-                setFormData(contact);
-            }
+            const found = store.contacts.find(c => c.id === Number(id));
+            if (found) setFormData(found);
         }
     }, [id, store.contacts]);
 
-    const handleChange = e => {
+    const handleChange = e =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handleSubmit = async e => {
         e.preventDefault();
+        const normalizedPhone = formData.phone.replace(/[^\d]/g, "");
+        const dataToSend = { ...formData, phone: normalizedPhone };
 
         try {
-            const url = id
-                ? `https://playground.4geeks.com/apis/fake/contact/${id}`
-                : "https://playground.4geeks.com/apis/fake/contact/";
-            const method = id ? "PUT" : "POST";
-
-            const response = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) throw new Error("Error al guardar contacto");
-
-            dispatch({ type: "refresh_needed" }); // usamos esta acción para volver a cargar contactos
-            navigate("/contacts");
-        } catch (error) {
-            console.error("Error al guardar contacto:", error);
+            if (id) {
+                await updateContact(dispatch, id, dataToSend);
+            } else {
+                await addContact(dispatch, dataToSend);
+            }
+            navigate("/");
+        } catch (err) {
+            console.error(err);
+            alert("Hubo un problema guardando el contacto");
         }
     };
 
@@ -57,12 +48,11 @@ export const AddContact = () => {
             <h2>{id ? "Editar Contacto" : "Agregar Contacto"}</h2>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                    <label>Nombre Completo</label>
+                    <label>Nombre</label>
                     <input
-                        type="text"
                         className="form-control"
-                        name="full_name"
-                        value={formData.full_name}
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                         required
                     />
@@ -81,7 +71,6 @@ export const AddContact = () => {
                 <div className="mb-3">
                     <label>Teléfono</label>
                     <input
-                        type="text"
                         className="form-control"
                         name="phone"
                         value={formData.phone}
@@ -92,7 +81,6 @@ export const AddContact = () => {
                 <div className="mb-3">
                     <label>Dirección</label>
                     <input
-                        type="text"
                         className="form-control"
                         name="address"
                         value={formData.address}
@@ -107,3 +95,8 @@ export const AddContact = () => {
         </div>
     );
 };
+
+
+
+
+
